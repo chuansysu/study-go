@@ -1,0 +1,79 @@
+计算字符串长度：
+    ASCII 字符串长度使用 len() 函数。
+    Unicode 字符串长度使用 utf8.RuneCountInString() 函数。
+
+	tip1 := "genji is a ninja"
+	fmt.Println(len(tip1)) => 16
+
+	tip2 := "忍者"
+	fmt.Println(len(tip2)) => 6 (字节数)
+	fmt.Println(utf8.RuneCountInString(tip2)) =>2 (utf8字符个数)
+
+遍历每一个ASCII字符：
+    ASCII 字符串遍历直接使用下标。
+    Unicode 字符串遍历用 for range。
+
+	theme := "狙击start"
+	for i:=0;i<len(theme);i++{
+		fmt.Printf("ascii:%c %d\n",theme[i],theme[i])
+	}
+	输出：
+	ascii: ?  231
+	ascii:     139
+	ascii:     153
+	ascii: ?  229
+	ascii:     135
+	ascii: ?  187
+	ascii:    32
+	ascii: s  115
+	ascii: t  116
+	ascii: a  97
+	ascii: r  114
+	ascii: t  116
+
+	for _,s := range theme{
+		fmt.Printf("Unicode:%c %d\n",s,s)
+	}
+	输出：
+	Unicode: 狙  29401
+	Unicode: 击  20987
+	Unicode:    32
+	Unicode: s  115
+	Unicode: t  116
+	Unicode: a  97
+	Unicode: r  114
+	Unicode: t  116
+
+字符串截取：
+    strings.Index：正向搜索子字符串。
+    strings.LastIndex：反向搜索子字符串。
+    搜索的起始位置可以通过切片偏移制作。
+
+	tracer := "死神来了，死神bye bye" => 中文逗号
+	comma := strings.Index(tracer,"，")
+	pos := strings.Index(tracer[comma:],"死神")
+	fmt.Println(comma,pos,tracer[comma+pos:])
+	输出：
+	12 3 死神bye bye
+	=> 中文逗号3个字节
+
+字符串拼接：除了+号
+	bytes.Buffer 是可以缓冲并可以往里面写入各种字节数组的。
+	字符串也是一种字节数组，使用 WriteString() 方法进行写入。
+
+	将需要连接的字符串，通过调用 WriteString() 方法，写入 stringBuilder 中，
+	然后再通过 stringBuilder.String() 方法将缓冲转换为字符串。
+
+        hammer := "吃我一锤"
+        sickle := "死吧"
+        var stringBuilder bytes.Buffer
+        stringBuilder.WriteString(hammer)
+        stringBuilder.WriteString(sickle)
+        fmt.Println(stringBuilder.String()) =>要使用String()，内存是数组
+
+	输出：
+		吃我一锤死吧
+
+
+
+
