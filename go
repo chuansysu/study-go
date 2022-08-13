@@ -41,8 +41,10 @@ GOPATH:/home/gchuan/go
 	3) 在myproject/目录执行go build main.go则在/myproject/目录生成main(***注意名字***),无其他生成
 	4) 在myproject/目录执行go build则在/myproject/目录生成myproject(***注意名字***),无其他生成
 	5) 在任意目录执行go build myproject则在/执行命令的当前目录生成myproject(***注意名字***),无其他生成
-	6) 任何目录执行go install myproject都可以在$GOPATH/bin/目录下生成main，pkg目录无输出
-	7) 任何目录执行go install myproject/utils都可以在$GOPATH/pkg/目录下生成pkg/linux_amd64/myproject/utils.a
+	6) 在myproject/执行go install都可以在$GOPATH/bin/目录下生成main，pkg目录无输出
+	7) 任何目录执行go install myproject都可以在$GOPATH/bin/目录下生成main，pkg目录无输出
+	8) 在myproject/utils/执行go install都可以在$GOPATH/pkg/目录下生成pkg/linux_amd64/myproject/utils.a
+	9) 任何目录执行go install myproject/utils都可以在$GOPATH/pkg/目录下生成pkg/linux_amd64/myproject/utils.a
 	总结:某些命令编译器会自动到$GOPATH/src/目录下面查找项目名称，比如go install myproject
 
 
