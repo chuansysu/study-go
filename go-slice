@@ -39,6 +39,8 @@ a := []int{1,2,3}
 	fmt.Println(numList == nil)		=>true
 	fmt.Println(numListEmpty == nil)	=>false,因为已经分配内存len(numListEmpty)=>0
 
+***判断一个切片是否为空：len(slice)==0 =>不使用slice == nil因为切片不等于nil情况下切片也可能为空***(见上面代码)
+
 切片是动态结构，只能与 nil 判定相等，不能互相判定相等。声明新的切片后，可以使用 append() 函数向切片中添加元素。
 
 使用 make() 函数构造切片:
@@ -51,7 +53,7 @@ a := []int{1,2,3}
 温馨提示:
 使用 make() 函数生成的切片一定发生了内存分配操作，但给定开始与结束位置（包括切片复位）的切片只是将新的切片结构指向已经分配好的内存区域，设定开始与结束位置，不会发生内存分配操作。
 
-待深入研究：********************************切片增长规则********************************
+待深入研究：********************************切片增长规则********************************(见最后)
 
 append()为切片增加元素：
 	尾部增加: 
@@ -142,6 +144,40 @@ for ... range可遍历对象:
 	==>一个包含两个元素的外层切片，同时每个元素包又含一个内层的整型切片
 	slice = append(slice,[]int{1000,2000}) =>[[10],[100,200],[1000,2000]]
 	
+切片扩容规则：
+
+//go1.15.6 源码 src/runtime/slice.go
+func growslice(et *_type, old slice, cap int) slice {
+	//省略部分判断代码
+	//计算扩容部分，其中，cap : 所需容量，newcap : 最终申请容量
+	newcap := old.cap
+	doublecap := newcap + newcap
+	if cap > doublecap {
+		newcap = cap
+	} else {
+		if old.len < 1024 {
+		newcap = doublecap
+		} else {
+   			// Check 0 < newcap to detect overflow
+   			// and prevent an infinite loop.
+   			for 0 < newcap && newcap < cap {
+    				newcap += newcap / 4
+   			}
+   			// Set newcap to the requested cap when
+   			// the newcap calculation overflowed.
+   			if newcap <= 0 {
+    				newcap = cap
+   			}
+  		}
+ 	} 
+ 	//省略部分判断代码
+}
+
+1. 如果当前所需容量大于原先容量的两倍，则最终申请容量为当前所需容量。(***最新版数据类型不同作不同处理还有内存对齐***)
+2.如果<条件1>不满足，表示当前所需容量不大于原容量的两倍，则进行如下判断：
+3.如果原切片长度小于1024(***最新版是256***)，则最终申请容量等于原容量的两倍。
+4.否则，最终申请容量每次增加1/4(***最新版newcap += (newcap + 3*256) / 4***)，直到大于所需容量为止，然后判断最终容量是否溢出，如果溢出，最终申请容量等于所需容量。
+
 
 
 
