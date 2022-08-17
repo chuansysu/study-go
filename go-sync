@@ -24,3 +24,36 @@
 		同时只能有一个 goroutine 能够获得写锁定；
 		同时可以有任意多个 gorouinte 获得读锁定；
 		同时只能存在写锁定或读锁定（读和写互斥）
+
+sync.WaitGroup:
+	(wg *WaitGroup)Add(delta int)
+	(wg *WaitGroup)Done()
+	(wg *WaitGroup)Wait()
+
+	package main
+	import(
+		"fmt"
+		"sync"
+		"net/http"
+	)
+	func main(){
+		var wg sync.WaitGroup
+		var urls =[]string{
+			"https://www.github.com/",
+			"https://qiniu.com/",
+			"https://www.golangtc.com/",
+		}
+
+		for _,url := range urls{
+			wg.Add(1)
+			go func(url string){
+				defer wg.Done()
+				_,err := http.Get(url)
+				fmt.Println(url,err)
+			}(url)
+		}
+		wg.Wait()
+		fmt.Println("over")
+	}
+
+
