@@ -1,0 +1,26 @@
+互斥锁 Mutex:
+	func (m *Mutex)Lock()
+	func (m *Mutex)Unlock()
+	
+	import "sync"
+	var lock sync.Mutex
+
+	lock.Lock()
+	defer lock.Unlock()
+
+读写锁:
+	写操作：
+	func (*RWMutex)Lock()
+	func (*RWMutex)Unlock()
+	读操作：
+	func (*RWMutex)Rlock()
+	func (*RWMutex)RUnlock()
+
+	读写锁的区别在于：
+		当有一个 goroutine 获得写锁定，其它无论是读锁定还是写锁定都将阻塞直到写解锁；
+		当有一个 goroutine 获得读锁定，其它读锁定仍然可以继续；
+		当有一个或任意多个读锁定，写锁定将等待所有读锁定解锁之后才能够进行写锁定。
+	总结：
+		同时只能有一个 goroutine 能够获得写锁定；
+		同时可以有任意多个 gorouinte 获得读锁定；
+		同时只能存在写锁定或读锁定（读和写互斥）
