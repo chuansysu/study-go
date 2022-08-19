@@ -56,4 +56,18 @@ sync.WaitGroup:
 		fmt.Println("over")
 	}
 
+延迟初始化：sync.Once
+	针对一次性初始化问题的特化解决方案
+	从概念上来讲，Once包含一个布尔变量和一个互斥量，
+	布尔变量记录初始化是否已经完成，互斥量则负责保护这个布尔变量和客户端的数据结构
+	
+	var loadIconsOnce sync.Once
+	var icons map[string]image.Image
+	
+	func Icon(name string)image.Image{
+		loadIconsOnce.Do(loadIcons) //loadIcons负责加载资源
+		return icons[name]
+	}
+	
+
 
