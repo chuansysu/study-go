@@ -1,0 +1,135 @@
+什么是反射?
+	简单的来说反射就是程序在运行时，通过检查其定义的变量以及值，进而找到其对应的真实类型。
+
+	反射是指在程序运行期对程序本身进行访问和修改的能力。
+
+	程序在编译时，变量被转换为内存地址，变量名不会被编译器写入到可执行部分。
+	在运行程序时，程序无法获取自身的信息。
+
+	支持反射的语言可以在程序编译期将变量的反射信息，如字段名称、类型信息、结构体信息等整合到可执行文件中，
+	并给程序提供接口访问反射信息，这样就可以在程序运行期获取类型的反射信息，并且有能力修改它们。
+
+	Go 程序的反射系统无法获取到一个可执行文件空间中或者是一个包中的所有类型信息，
+	需要配合使用标准库中对应的词法、语法解析器和抽象语法树（AST）对源码进行扫描后获得这些信息。
+
+	Go语言提供了一种机制在运行时更新和检查变量的值、调用变量的方法和变量支持的内在操作，
+	但是在编译时并不知道这些变量的具体类型，这种机制被称为反射。
+	反射也可以让我们将类型本身作为第一类的值类型处理。
+	
+	******************
+	非必需不要使用反射
+	******************
+
+	******************************************************************************************
+	任意接口值在反射中都可以理解为由 reflect.Type 和 reflect.Value 两部分组成
+	reflect 包提供了 reflect.TypeOf 和 reflect.ValueOf 两个函数来获取任意对象的 Value 和 Type。
+	******************************************************************************************
+	
+	reflect.Type =>interface{}
+	reflect.Value =>struct{}
+
+反射的类型(Type)与种类(Kind)
+	编程中，使用最多的是类型，但在反射中，当需要区分一个大品种的类型时，就会用到种类（Kind）。
+	例如需要统一判断类型中的指针时，使用种类（Kind）信息就较为方便。
+
+	类型（Type）指的是系统原生数据类型，如 int、string、bool、float32 等类型，
+	以及使用 type 关键字定义的类型，这些类型的名称就是其类型本身的名称。
+	例如使用 type A struct{} 定义结构体时，A 就是 struct{} 的类型。
+
+1) 反射种类（Kind）的定义
+
+	Map、Slice、Chan 属于引用类型，使用起来类似于指针，但是在种类常量定义中仍然属于独立的种类，
+	不属于 Ptr。type A struct{} 定义的结构体属于 Struct 种类，*A 属于 Ptr。
+
+	type Kind uint
+	const (
+		Invalid Kind = iota  // 非法类型
+		Bool                 // 布尔型
+		Int                  // 有符号整型
+		Int8                 // 有符号8位整型
+		Int16                // 有符号16位整型
+		Int32                // 有符号32位整型
+		Int64                // 有符号64位整型
+		Uint                 // 无符号整型
+		Uint8                // 无符号8位整型
+		Uint16               // 无符号16位整型
+		Uint32               // 无符号32位整型
+		Uint64               // 无符号64位整型
+		Uintptr              // 指针
+		Float32              // 单精度浮点数
+		Float64              // 双精度浮点数
+		Complex64            // 64位复数类型
+		Complex128           // 128位复数类型
+		Array                // 数组
+		Chan                 // 通道
+		Func                 // 函数
+		Interface            // 接口
+		Map                  // 映射
+		Ptr                  // 指针
+		Slice                // 切片
+		String               // 字符串
+		Struct               // 结构体
+		UnsafePointer        // 底层指针
+	)
+
+2) 从类型**对象**中获取类型名称和种类的例子
+
+	type cat struct{
+	}
+	typeOfCat := reflect.TypeOf(cat{}) 				==>注意是对象
+	fmt.Println(typeOfCat.Name(),typeOfCat.Kind()) 	==>cat struct
+	
+	type Enum int
+	const (
+		Zero Enum = 0
+	)
+	typeOfA := reflect.TypeOf(Zero)
+	fmt.Println(typeOfA.Name(),typeOfA.Kind())		==>Enum int
+	
+通过反射获取指针指向的元素类型:
+	对指针获取反射对象时，可以通过 reflect.Elem() 方法获取这个指针指向的元素类型。
+	这个获取过程被称为取元素，等效于对指针类型变量做了一个*操作
+	
+	ins := &cat{}
+	typeOfCat := reflect.TypeOf(ins)
+	fmt.Printf("name:'%v' kind:'%v'\n",typeOfCat.Name(), typeOfCat.Kind())
+	
+	typeOfCat = typeOfCat.Elem()
+	fmt.Printf("element name: '%v', element kind: '%v'\n", typeOfCat.Name(), typeOfCat.Kind())
+
+	输出：
+	name:'' kind:'ptr'		=>指针name为空，kind为ptr
+	element name:'cat',element kind:'struct'
+	
+通过反射获取结构体的成员类型
+
+	type cat struct{
+		Name string
+		Type int `json:"type" id:"100"` //json:"type"之间不能有空格
+	}
+	ins := cat{Name:"mimi",Type:1}
+	typeOfCat := reflect.TypeOf(ins)
+	
+	for i:=0;i<typeOfCat.NumField();i++{
+		fieldType := typeOfCat.Field(i)
+		fmt.Printf("name:%v tag:'%v'\n",fieldType.Name,fieldType.Tag)
+	}
+	
+	if catType,ok := typeOfCat.FieldByName("Type");ok{
+		fmt.Println(catType.Tag.Get("json"),catType.Tag.Get("id"))
+	}
+	输出:
+	name:Name tag:''
+	name:Type tag:'json:"type" id:"100"'
+	type 100
+
+
+
+
+
+
+
+
+
+
+
