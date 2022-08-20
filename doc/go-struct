@@ -1,0 +1,159 @@
+Go 语言不仅认为结构体能拥有方法，且每种自定义类型也可以拥有自己的方法。 ==> 接收方法****
+
+结构体定义:
+	struct{}：表示结构体类型，type 类型名 struct{}可以理解为将 struct{} 结构体定义为类型名的类型。
+	=> type myInt int
+	=> type myStru struct{...} *********统一样式挺好的*********
+	=>myStru跟myInt一样是类型名
+	type Point struct{
+		X int	//多行模式
+		Y int
+	}		
+	type Color struct{
+		R,G,B byte	//单行合并
+	}
+
+	结构体的定义只是一种内存布局的描述，只有当结构体实例化时，才会真正地分配内存
+
+实例化：
+	实例化就是根据结构体定义的格式创建一份与格式一致的内存区域，结构体实例与实例间的内存是完全独立的。
+	
+	1.基本实例化形式：
+		type Point struct{
+			X int
+			Y int
+		}
+		var p Point
+		p.X = 10
+		p.Y = 20
+
+	2.创建指针类型的形式：
+		ins := new(T)
+		ins：T 类型被实例化后保存到 ins 变量中，ins 的类型为 *T，属于指针。
+		在Go语言中，访问结构体指针的成员变量时可以继续使用.，
+		这是因为Go语言为了方便开发者访问结构体指针的成员变量，使用了语法糖（Syntactic sugar）技术，
+		将 ins.Name 形式转换为 (*ins).Name。 
+
+		ins := new(Point)
+		ins.X = 10	//(*ins).X = 10也可以
+		ins.Y = 20	//(*ins).Y = 10也可以
+
+	3.取结构体的地址实例化：
+		ins := &T{}
+		ins 为结构体的实例，类型为 *T，是指针类型。
+		type Command struct{
+			Name string
+			Var *int
+			Comment string
+		}
+		var version int=1
+		cmd := &Command{}
+		cmd.Name = "version"
+		cmd.Var = &version
+		cmd.Comment="show version"
+
+初始化结构体的成员变量：
+	结构体在实例化时可以直接对成员变量进行初始化，初始化有两种形式分别是以字段“键值对”形式和多个值的列表形式，
+	键值对形式的初始化适合**选择性**填充字段较多的结构体，多个值的列表形式适合填充**字段较少**的结构体。 
+
+	1.键值对：
+		键值之间以:分隔，键值对之间以,分隔。 
+		type People struct{
+        		name string
+        		child *People
+		}
+		relation := &People{
+                name:"爷爷",
+                child:&People{
+                        name:"爸爸",
+                        child:&People{
+                                name:"我",	// **************最后一个字段的逗号不能少**************
+                        	},
+                	},
+        	}
+
+	2.使用多个值列表初始化：
+		relation := &People{
+                	"爷爷",
+                	&People{
+               			"爸爸",
+              		&People{
+                          		"我",	// **************最后一个字段的逗号不能少**************
+					nil,	// 每个字段都得有初始值*********************
+                        	},
+                	},
+        	}
+
+	3.初始化匿名结构体：
+		ins := struct{
+			x int
+			y int
+		}{ // 后部分是可选的
+			y:10,
+		}
+
+		匿名结构体的类型名是结构体包含字段成员的详细描述，
+		匿名结构体在使用时需要重新定义，造成大量重复的代码，因此开发中较少使用。
+		*************就是要把字段全部列出来，像定义时一样*******************
+
+	结构体构造函数：
+		type Cat struct{
+			Color string
+			Name string
+		}
+		func NewCatByName(name string)*Cat{
+			return &Cat{
+				Name:name,
+			}
+		}
+		func NewCatByColor(color string)*Cat{
+			return &Cat{
+				Color:color,
+			}
+		}
+	带有父子关系：
+		type BlackCat struct{
+			Cat
+		}
+		func NewCat(name string)*Cat{
+			return &Cat{
+				Name:name,
+			}
+		}
+		func NewBlackCat(color string)*BlackCat{
+			cat := &BlackCat{}
+			cat.Color = color
+			return cat
+		}
+
+类型内嵌和结构体内嵌：
+	结构体可以包含一个或多个匿名（或内嵌）字段，即这些字段没有显式的名字，只有字段的类型是必须的，
+	此时类型也就是字段的名字。匿名字段本身可以是一个结构体类型，即结构体可以包含内嵌结构体。
+	在Go语言中，相比较于继承，组合更受青睐。
+	type InnerS struct{
+		in1,in2 int
+	}
+	type OuterS struct{
+		b int
+		c float32
+		int		//********在一个结构体中对于每一种数据类型只能有一个匿名字段。*********
+		InnerS
+		is1 InnerS
+		is2 InnerS
+	}
+	ot := &OuterS{}
+	ot.int = 100
+	ot.in1 = 10 =>*********如果OuterS中有和InnerS字段重名只能ot.innerS.in1*********
+	ot.innerS.in2 = 20 =>两种方式都可以
+	ot.is1.in1 = 10
+	ot.is2.in2 = 20
+
+
+
+
+
+
+
+
+
+

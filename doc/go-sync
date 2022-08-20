@@ -1,0 +1,73 @@
+互斥锁 Mutex:
+	func (m *Mutex)Lock()
+	func (m *Mutex)Unlock()
+	
+	import "sync"
+	var lock sync.Mutex
+
+	lock.Lock()
+	defer lock.Unlock()
+
+读写锁:
+	写操作：
+	func (*RWMutex)Lock()
+	func (*RWMutex)Unlock()
+	读操作：
+	func (*RWMutex)Rlock()
+	func (*RWMutex)RUnlock()
+
+	读写锁的区别在于：
+		当有一个 goroutine 获得写锁定，其它无论是读锁定还是写锁定都将阻塞直到写解锁；
+		当有一个 goroutine 获得读锁定，其它读锁定仍然可以继续；
+		当有一个或任意多个读锁定，写锁定将等待所有读锁定解锁之后才能够进行写锁定。
+	总结：
+		同时只能有一个 goroutine 能够获得写锁定；
+		同时可以有任意多个 gorouinte 获得读锁定；
+		同时只能存在写锁定或读锁定（读和写互斥）
+
+sync.WaitGroup:
+	(wg *WaitGroup)Add(delta int)
+	(wg *WaitGroup)Done()
+	(wg *WaitGroup)Wait()
+
+	package main
+	import(
+		"fmt"
+		"sync"
+		"net/http"
+	)
+	func main(){
+		var wg sync.WaitGroup
+		var urls =[]string{
+			"https://www.github.com/",
+			"https://qiniu.com/",
+			"https://www.golangtc.com/",
+		}
+
+		for _,url := range urls{
+			wg.Add(1)
+			go func(url string){
+				defer wg.Done()
+				_,err := http.Get(url)
+				fmt.Println(url,err)
+			}(url)
+		}
+		wg.Wait()
+		fmt.Println("over")
+	}
+
+延迟初始化：sync.Once
+	针对一次性初始化问题的特化解决方案
+	从概念上来讲，Once包含一个布尔变量和一个互斥量，
+	布尔变量记录初始化是否已经完成，互斥量则负责保护这个布尔变量和客户端的数据结构
+	
+	var loadIconsOnce sync.Once
+	var icons map[string]image.Image
+	
+	func Icon(name string)image.Image{
+		loadIconsOnce.Do(loadIcons) //loadIcons负责加载资源
+		return icons[name]
+	}
+	
+
+
