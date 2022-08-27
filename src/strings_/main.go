@@ -46,4 +46,5 @@ func main() {
 
 	fmt.Println(strings.TrimLeft("00012300", "0"))   // 12300
 	fmt.Println(strings.TrimPrefix("00012300", "0")) // 0012300
+	fmt.Println(strings.Clone("helloworld"))
 }
