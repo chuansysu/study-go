@@ -1,0 +1,19 @@
+syntax = "proto3";
+package myproto;
+option go_package="/myprotopb";
+
+enum E{
+    E_SUCCEED = 0;
+    E_FAILED = 1;
+}
+
+message Login{
+    string Account = 1;
+    int64 UserId = 2;
+}
+
+message LoginRsp{
+    string Account = 1;
+    int64 UserId = 2;
+    int32 Result = 3;
+}
