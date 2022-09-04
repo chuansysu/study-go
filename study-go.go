@@ -1,23 +1,34 @@
 package main
 
 import (
-	"fmt"
-	"unsafe"
+	"study-go/endian_"
+
+	flag "github.com/spf13/pflag"
 )
 
-type s struct{ i int }
+var ip *string = flag.String("ip", "127.0.0.1", "bind ip address")
+var port int
+var isAuth bool
 
-const VERSION = "1.0"
+func init() {
+	flag.IntVar(&port, "port", 8080, "listening port")
+	flag.BoolVarP(&isAuth, "isAuth", "a", false, "whether auth enable")
+}
+
+// study-go.exe version --ip "127.0.0.1" --port 9999 -a=false
 
 func main() {
+	flag.Parse()
+	//fmt.Println("ipAddr has value ", *ip)
+	//fmt.Println("tcpPort has value ", port)
+	//fmt.Println("isAuth has value ", isAuth)
 	//log_.DemoLog()
 	//yaml_.DemoYaml()
 	//filepath_.DemoFilePath()
 	//io_.DemoIO()
-	// q := [3]int{1, 2, 3}[1:]
-	fmt.Printf("%p\n", &s{})
-	fmt.Println(unsafe.Pointer(&s{}))
-	q := &s{}
-	fmt.Printf("%p,%v\n", q, q)
-	fmt.Printf("%p\n", &[]int{1, 2, 3})
+	//viper_.DemoViper()
+	//viper := viper_.GetViper()
+	//fmt.Println(viper.AllKeys())
+	//cobra_.Execute()
+	endian_.DemoEndian()
 }
